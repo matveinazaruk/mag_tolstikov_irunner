@@ -4,6 +4,10 @@
 *.o
 *.obj
 
+.idea
+inp*
+out*
+
 # Precompiled Headers
 *.gch
 *.pch
