@@ -62,7 +62,7 @@ int main() {
     if (rows * cols < blockSize) {
         blockRows = rows;
         blockCols = cols;
-    } else if {
+    } else {
         if (rows < blockRows) {
             blockRows = rows;
             blockCols = std::min(blockSize / blockRows, cols);
