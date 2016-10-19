@@ -16,7 +16,7 @@ char * transpose(const char * array, const int rows, const int cols) {
 char * readBlock(std::ifstream &fin, const int blockRows, const int blockCols,
                  const int rows, const int cols, const int rowsOffset, const int colsOffset) {
     char * buffer = new char [blockRows * blockCols];
-    if (cols == 1 || rows == 1 || (blockRows == rows && blockCols == cols)) {
+    if (blockCols == cols) {
         fin.read(buffer, blockRows * blockCols);
     } else {
         for (int i = 0; i < blockRows; i++) {
@@ -32,7 +32,7 @@ char * readBlock(std::ifstream &fin, const int blockRows, const int blockCols,
 void writeBlock(std::ofstream &fout, const char *buffer, const int blockRows, const int blockCols,
                 const int rows, const int cols,
                 const int rowsOffset, const int colsOffset) {
-    if (cols == 1 || rows == 1 || (blockRows == rows && blockCols == cols)) {
+    if (blockCols == cols) {
         fout.write(buffer, blockCols * blockRows);
     } else {
         for (int i = 0; i < blockRows; i++) {
