@@ -16,25 +16,30 @@ char * transpose(const char * array, const int rows, const int cols) {
 char * readBlock(std::ifstream &fin, const int blockRows, const int blockCols,
                  const int rows, const int cols, const int rowsOffset, const int colsOffset) {
     char * buffer = new char [blockRows * blockCols];
-    for (int i = 0; i < blockRows; i++) {
-        if (cols != 1 && rows != 1) {
+    if (cols == 1 || rows == 1) {
+        fin.read(buffer, blockRows * blockCols);
+    } else {
+        for (int i = 0; i < blockRows; i++) {
             int seek = (rowsOffset + i) * cols + colsOffset + 8;
             fin.seekg(seek, std::ios_base::beg);
+            fin.read(buffer + i * blockCols, blockCols);
         }
-        fin.read(buffer + i * blockCols, blockCols);
     }
+    
     return buffer;
 }
 
 void writeBlock(std::ofstream &fout, const char *buffer, const int blockRows, const int blockCols,
                 const int rows, const int cols,
                 const int rowsOffset, const int colsOffset) {
-    for (int i = 0; i < blockRows; i++) {
-        if (cols != 1 && rows != 1) {
+    if (cols == 1 && rows == 1) {
+        fout.write(buffer, blockCols * blockRows);
+    } else {
+        for (int i = 0; i < blockRows; i++) {
             int seek = (rowsOffset + i) * cols + colsOffset + 8;
             fout.seekp(seek, std::ios_base::beg);
+            fout.write(buffer + i * blockCols, blockCols);
         }
-        fout.write(buffer + i * blockCols, blockCols);
     }
 }
 
@@ -73,7 +78,6 @@ int main() {
             char * buffer = readBlock(fin, adjustedBlockRows, adjustedBlockCols,
                                       rows, cols, rowsOffset, colsOffset);
             auto transposed = transpose(buffer, adjustedBlockRows, adjustedBlockCols);
-            transpose(transposed, adjustedBlockRows, adjustedBlockCols);
             writeBlock(fout, transposed, adjustedBlockCols, adjustedBlockRows, cols, rows, colsOffset, rowsOffset);
             delete buffer;
             delete transposed;
