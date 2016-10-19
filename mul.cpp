@@ -15,35 +15,38 @@ void multiply(const uint8_t * a, const uint8_t * b, uint8_t * c, int a_rows, int
 
 uint8_t * readBlock(std::fstream &fin, const int blockRows, const int blockCols,
                  const int rows, const int cols, const int rowsOffset, const int colsOffset, const int offset) {
-    uint8_t * buffer = new uint8_t [blockRows * blockCols];
-    for (int i = 0; i < blockRows; i++) {
-        if (cols != 1 && rows != 1 || i == 0) {
+    char * buffer = new char [blockRows * blockCols];
+    if (blockCols == cols) {
+        fin.read(buffer, blockRows * blockCols);
+    } else {
+        for (int i = 0; i < blockRows; i++) {
             int seek = (rowsOffset + i) * cols + colsOffset + offset;
             fin.seekg(seek, std::ios_base::beg);
+            fin.read(buffer + i * blockCols, blockCols);
         }
-        fin.read((char *)(buffer + i * blockCols), blockCols);
     }
-    return buffer;
 }
 
 void writeBlock(std::fstream &fout, const uint8_t *buffer, const int blockRows, const int blockCols,
                 const int rows, const int cols,
                 const int rowsOffset, const int colsOffset, const int offset) {
-    for (int i = 0; i < blockRows; i++) {
-        if (cols != 1 && rows != 1 || i == 0) {
+    if (blockCols == cols) {
+        fout.write(buffer, blockCols * blockRows);
+    } else {
+        for (int i = 0; i < blockRows; i++) {
             int seek = (rowsOffset + i) * cols + colsOffset + offset;
             fout.seekp(seek, std::ios_base::beg);
+            fout.write(buffer + i * blockCols, blockCols);
         }
-        fout.write((char *) (buffer + i * blockCols), blockCols);
     }
 }
 
 int main() {
-    std::fstream fin("input_3x3.bin", std::fstream::in | std::fstream::binary);
+    std::fstream fin("input.bin", std::fstream::in | std::fstream::binary);
     std::fstream fout("output.bin", std::fstream::out | std::fstream::binary);
     fout.clear();
     uint32_t size = 0;
-    uint32_t blockSize = 2;
+    uint32_t blockSize = 300;
 
     fin.read((char *)&size, sizeof(size));
     fout.write((char *)&size, sizeof(size));
