@@ -16,7 +16,7 @@ char * transpose(const char * array, const int rows, const int cols) {
 char * readBlock(std::ifstream &fin, const int blockRows, const int blockCols,
                  const int rows, const int cols, const int rowsOffset, const int colsOffset) {
     char * buffer = new char [blockRows * blockCols];
-    if (cols == 1 || rows == 1) {
+    if (cols == 1 || rows == 1 || (blockRows == rows && blockCols == cols)) {
         fin.read(buffer, blockRows * blockCols);
     } else {
         for (int i = 0; i < blockRows; i++) {
@@ -32,7 +32,7 @@ char * readBlock(std::ifstream &fin, const int blockRows, const int blockCols,
 void writeBlock(std::ofstream &fout, const char *buffer, const int blockRows, const int blockCols,
                 const int rows, const int cols,
                 const int rowsOffset, const int colsOffset) {
-    if (cols == 1 && rows == 1) {
+    if (cols == 1 || rows == 1 || (blockRows == rows && blockCols == cols)) {
         fout.write(buffer, blockCols * blockRows);
     } else {
         for (int i = 0; i < blockRows; i++) {
@@ -58,16 +58,24 @@ int main() {
 
     fout.write((char *)&cols, sizeof(cols));
     fout.write((char *)&rows, sizeof(rows));
-
-    if (rows < blockRows) {
+    
+    if (rows * cols < blockSize) {
         blockRows = rows;
-        blockCols = std::min(blockSize / blockRows, cols);
+        blockCols = cols;
+    } else if {
+        if (rows < blockRows) {
+            blockRows = rows;
+            blockCols = std::min(blockSize / blockRows, cols);
+        }
+
+        if (cols < blockCols) {
+            blockCols = cols;
+            if (blockRows != rows) {
+                blockRows = std::min(blockSize / blockCols, rows);
+            }
+        }
     }
 
-    if (cols < blockCols) {
-        blockCols = cols;
-        blockRows = std::min(blockSize / blockCols, rows);
-    }
 
     for (int i = 0; i < rows / (double) blockRows; i++) {
         int rowsOffset = i * blockRows;
